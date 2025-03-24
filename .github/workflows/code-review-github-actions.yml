@@ -83,10 +83,10 @@ jobs:
             RESPONSE=$(curl -s -X POST "https://openrouter.ai/api/v1/chat/completions" \
               -H "Authorization: Bearer $OPEN_ROUTER_API_KEY" \
               -H "Content-Type: application/json" \
-              -d "{
-                \"model\": \"rekaai/reka-flash-3:free\",
-                \"messages\": [{\"role\": \"user\", \"content\": \"Review the following code changes and suggest improvements:\n$CONTENT\"}]
-              }")
+              -d "$(jq -n --arg content "$CONTENT" '{
+                model: "rekaai/reka-flash-3:free",
+                messages: [{role: "user", content: $content}]
+              }')")
 
             echo "API Response: $RESPONSE"
 
