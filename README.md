@@ -3,7 +3,7 @@
  
  model : ```rekaai/reka-flash-3```
  
- Easy setup to your Github Action
+ Easy setup to your Github Action, launch automatically when you do pull request
 
 # How to use :
 1. download .yaml file [here](https://github.com/mikkelofficial7/revbot-ai-code-review/blob/main/.github/workflows/test-github-actions.yml)
