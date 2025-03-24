@@ -80,13 +80,21 @@ jobs:
             # Convert to JSON-friendly format
             CONTENT=$(echo "$DIFF_CONTENT" | jq -Rs .)
 
-            REVIEW=$(curl -s -X POST "https://openrouter.ai/api/v1/chat/completions" \
+            RESPONSE=$(curl -s -X POST "https://openrouter.ai/api/v1/chat/completions" \
               -H "Authorization: Bearer $OPEN_ROUTER_API_KEY" \
               -H "Content-Type: application/json" \
               -d "{
                 \"model\": \"rekaai/reka-flash-3:free\",
                 \"messages\": [{\"role\": \"user\", \"content\": \"Review the following code changes and suggest improvements:\n$CONTENT\"}]
-              }" | jq -r '.choices[0].message.content')
+              }")
+
+            echo "API Response: $RESPONSE"
+
+            REVIEW=$(echo "$RESPONSE" | jq -r 'if .choices then .choices[0].message.content else "No response from AI" end')
+
+            if [[ "$REVIEW" == "null" || -z "$REVIEW" ]]; then
+              REVIEW="AI did not return a valid response. Please check your request."
+            fi
 
             echo "Review Input (Changed Content Only): $CONTENT"
             echo "Review Output: $REVIEW"
