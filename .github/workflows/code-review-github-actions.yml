@@ -90,10 +90,10 @@ jobs:
 
             echo "API Response: $RESPONSE"
 
-            REVIEW=$(echo "$RESPONSE" | jq -r 'if .choices then .choices[0].message.content else "No response from AI" end')
+            REVIEW=$(echo "$RESPONSE" | sed '/<reasoning>/,/<\/reasoning>/d')
 
             if [[ "$REVIEW" == "null" || -z "$REVIEW" ]]; then
-              REVIEW="AI did not return a valid response. Please check your request."
+              REVIEW="AI did not return a comment for this."
             fi
 
             echo "Review Input (Changed Content Only): $CONTENT"
