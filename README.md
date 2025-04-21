@@ -1,7 +1,7 @@
 # 🤖 Revbot: a hassle-free AI-based code reviewer
- AI Based Code Review using [Reka Flash AI](https://www.reka.ai/)
+ AI Based Code Review using [Meta Llama](https://www.llama.com/) model
  
- model I used : ```rekaai/reka-flash-3```
+ model I used : ```meta-llama/llama-4-maverick```
  
  Easy setup to your ```Github Action```, reviews launched automatically when you do ```pull request```
 
