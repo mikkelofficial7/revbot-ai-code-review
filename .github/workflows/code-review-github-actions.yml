@@ -41,7 +41,7 @@ jobs:
           echo "Filtered Changed Files:"
           cat changed_files.txt
 
-      - name: Run Reka AI Code Review
+      - name: Run Meta Llama Code Review
         env:
           OPEN_ROUTER_API_KEY: ${{ secrets.OPEN_ROUTER_API_KEY }}
         run: |
@@ -71,7 +71,7 @@ jobs:
             # Extract only added (+) and removed (-) lines, ignore metadata
             DIFF_CONTENT=$(git diff -U0 "$BASE_COMMIT" -- "$FILE" | grep -E '^\+|^-')
 
-            # If no changes exist, skip review
+            # If no changes exist, skip the review
             if [[ -z "$DIFF_CONTENT" ]]; then
               echo "No content changes detected in $FILE, skipping..."
               continue
@@ -84,7 +84,7 @@ jobs:
               -H "Authorization: Bearer $OPEN_ROUTER_API_KEY" \
               -H "Content-Type: application/json" \
               -d "$(jq -n --arg content "$CONTENT" '{
-                model: "rekaai/reka-flash-3:free",
+                model: "meta-llama/llama-4-maverick:free",
                 messages: [{role: "user", content: $content}]
               }')")
 
@@ -92,22 +92,20 @@ jobs:
 
             RESPONSE_MESSAGE_ONLY=$(echo "$RESPONSE" | jq -r 'if .choices then .choices[0].message.content else "No response from AI" end')
 
-            REVIEW=$(echo "$RESPONSE_MESSAGE_ONLY" | sed '/<reasoning>/,/<\/reasoning>/d')
-
-            if [[ "$REVIEW" == "null" || -z "$REVIEW" ]]; then
-              REVIEW="AI did not return a valid response. Please check your request."
+            if [[ "$RESPONSE_MESSAGE_ONLY" == "null" || -z "$RESPONSE_MESSAGE_ONLY" ]]; then
+              RESPONSE_MESSAGE_ONLY="AI did not return a valid response. Please check your request."
             fi
 
-            echo "Review Input (Changed Content Only): $CONTENT"
-            echo "Review Output: $REVIEW"
+            echo "Review Input (Changed CONTENT Only): $CONTENT"
+            echo "Review Output: $RESPONSE_MESSAGE_ONLY"
 
-            jq --arg file "$FILE" --arg comment "$REVIEW" \
+            jq --arg file "$FILE" --arg comment "$RESPONSE_MESSAGE_ONLY" \
               '. + [{"file": $file, "comment": $comment}]' \
               review_comments.json > temp.json && mv temp.json review_comments.json
 
           done < changed_files.txt
 
-      - name: Post Review Comments to PR
+      - name: Post Review Comments to Pull Request (PR)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
